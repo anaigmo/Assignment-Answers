@@ -15,8 +15,7 @@ class SeedStock
     @mutant_geneID = params.fetch(:mutant_geneID, "0000000")
     @last_planted = params.fetch(:last_planted, "00/00/0000")
     @storage = params.fetch(:storage, 'unknown')
-    @grams_remaining = params.fetch(:grams_remaining, 0)
-    @grams_remaining = @grams_remaining.to_i
+    @grams_remaining = params.fetch(:grams_remaining, 0).to_i
   end
   
   def planting_seeds(number)
@@ -24,7 +23,7 @@ class SeedStock
       @grams_remaining = @grams_remaining - number
     else
       @grams_remaining = 0
-      puts "There are no more grams of seed #{@seed_stock}"
+      puts "WARNING: we have run out of Seed Stock #{@seed_stock}"
     end
   end
   

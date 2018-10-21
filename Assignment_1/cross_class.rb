@@ -15,11 +15,27 @@ class Cross
   def initialize (params = {})
     @parent1 = params.fetch(:parent1, 'unknown parent 1')
     @parent2 = params.fetch(:parent2, 'unknown parent 2')
-    @F2_wild = params.fetch(:F2_wild, "0000000")
-    @F2_P1 = params.fetch(:F2_P1, "0000000")
-    @F2_P2 = params.fetch(:F2_P2, "0000000")
-    @F2_P1P2 = params.fetch(:F2_P1P2, "0000000")
+    @F2_wild = params.fetch(:F2_wild, "0000000").to_f
+    @F2_P1 = params.fetch(:F2_P1, "0000000").to_f
+    @F2_P2 = params.fetch(:F2_P2, "0000000").to_f
+    @F2_P1P2 = params.fetch(:F2_P1P2, "0000000").to_f
   end
+  
+  def chisquare()
+    total = @F2_wild + @F2_P1 + @F2_P2 + @F2_P1P2
+    exp_value = Array.new([9.0/16*total, 3.0/16*total, 3.0/16*total, 1.0/16*total])
+    
+    chis = ((@F2_wild-exp_value[0])**2)/exp_value[0] + ((@F2_P1-exp_value[1])**2)/exp_value[1] + ((@F2_P2-exp_value[2])**2)/exp_value[2] + ((@F2_P1P2-exp_value[3])**2)/exp_value[3]
+
+    if (chis > 3.84) 
+      puts "Recording: #{@parent1.mutant_geneID.name} is genetically linked to #{@parent2.mutant_geneID.name} with a chisquare score #{chis}"
+      return [@parent1.mutant_geneID.name, @parent2.mutant_geneID.name]
+    else
+      return false
+    end
+    
+  end
+  
   
 end
 

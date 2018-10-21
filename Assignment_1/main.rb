@@ -21,5 +21,24 @@ list_seedstock.each_value do |seed|
 	out_file.puts("#{seed.seed_stock}\t#{seed.mutant_geneID.ID}\t#{Time.now.strftime("%d/%m/%Y")}\t#{seed.storage}\t#{seed.grams_remaining}")
 end
 
+linked_genes = Array.new()
+list_crosses.each_value do |cross|
+	linked = cross.chisquare()
+	linked_genes.push(linked) if (linked)
+end
 
-puts list_crosses["A334"].parent2.mutant_geneID.name
+puts
+puts "Final Report:"
+if (linked_genes)
+	linked_genes.each do |lg|
+		puts "#{lg[0]} is linked to #{lg[1]}"
+		puts "#{lg[1]} is linked to #{lg[0]}"
+	end
+else
+	puts "There are no linked genes" 
+end
+
+
+
+
+
