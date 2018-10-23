@@ -29,24 +29,27 @@ end
 out_file = File.open(ARGV[3], "w")  
 out_file.puts("Seed_Stock\tMutant_Gene_ID\tLast_Planted\tStorage\tGrams_Remaining")  # Header
 list_seedstock.each_value do |seed|
-	seed.planting_seeds(7)  # Call the method in the class to do the subtracion
+	seed.planting_seeds(7)  # Call the method in the class to do the subtraction
 	out_file.puts("#{seed.seed_stock}\t#{seed.mutant_geneID.ID}\t#{Time.now.strftime("%d/%m/%Y")}\t#{seed.storage}\t#{seed.grams_remaining}")
 end
 
+
 # Check if there are linked genes
-linked_genes = Array.new()
+count = 0
 list_crosses.each_value do |cross|
 	linked = cross.chisquare()
-	linked_genes.push(linked) if (linked)  # The linked genes are stored in an array
+	count += 1  if (linked)  # The linked genes are stored in an array
 end
+
 
 # Printing final report in screen...
 puts
 puts "Final Report:"
-if (linked_genes)
-	linked_genes.each do |lg|
-		puts "#{lg[0]} is linked to #{lg[1]}"
-		puts "#{lg[1]} is linked to #{lg[0]}"
+if (count > 0)
+	list_genes.each_value do |gene|
+		if (gene.linked_to)
+			puts "#{gene.name} is linked to #{gene.linked_to}"
+		end
 	end
 else
 	puts "There are no linked genes" 

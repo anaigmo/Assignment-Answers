@@ -21,6 +21,7 @@ class Cross
     @F2_P1P2 = params.fetch(:F2_P1P2, 0.0).to_f
   end
   
+  
   def chisquare()
     # This function evaluates if two genes are linked calculating chisquare score
     
@@ -30,7 +31,9 @@ class Cross
     # Chisquare score
     chis = ((@F2_wild-exp_value[0])**2)/exp_value[0] + ((@F2_P1-exp_value[1])**2)/exp_value[1] + ((@F2_P2-exp_value[2])**2)/exp_value[2] + ((@F2_P1P2-exp_value[3])**2)/exp_value[3]
 
-    if (chis > 3.84)  # When they are linked 
+    if (chis > 3.84)  # When they are linked
+      @parent1.mutant_geneID.linked_to = @parent2.mutant_geneID.name
+      @parent2.mutant_geneID.linked_to = @parent1.mutant_geneID.name
       puts "Recording: #{@parent1.mutant_geneID.name} is genetically linked to #{@parent2.mutant_geneID.name} with a chisquare score #{chis}"
       return [@parent1.mutant_geneID.name, @parent2.mutant_geneID.name]
     else

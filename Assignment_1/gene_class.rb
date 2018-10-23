@@ -5,12 +5,14 @@ class Gene
   attr_accessor :ID  
   attr_accessor :name
   attr_accessor :mutant_phenotype
+  attr_accessor :linked_to
   
   def initialize (params = {})
     @ID = params.fetch(:ID, 'unknown gene')
     abort("ERROR: Wrong gene IDs in gene file.") unless @ID =~ /A[Tt]\d[Gg]\d\d\d\d\d/ 
     @name = params.fetch(:name, "0000000")
-    @mutant_phenotype = params.fetch(:mutant_phenotype, "0000000") 
+    @mutant_phenotype = params.fetch(:mutant_phenotype, "0000000")
+    @linked_to = nil
   end
   
 end
