@@ -53,7 +53,7 @@ def create_cross(list_seeds, in_file)
   
   File.open(in_file, "r").each do |line|
     
-    if (first_line)
+    if (first_line)  # Check if the file exists
       
       # Check if the file is the right one
       if (line =~ /Parent1\tParent2\tF2_Wild\tF2_P1\tF2_P2\tF2_P1P2\n/)
