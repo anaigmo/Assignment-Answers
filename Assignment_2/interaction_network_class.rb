@@ -19,9 +19,11 @@ class InteractionNetwork
       end
       
       @connections[key].each do |prot|
-        
-        if (proteins.key?(prot))
+        if (nodes.key?(prot))
+          next
+        elsif (proteins.key?(prot))
           @nodes[prot] = proteins[prot]
+          puts "holi"
         else
           @nodes[prot] = FALSE  # The protein doesn't come from a gene of the list
         end
@@ -29,11 +31,40 @@ class InteractionNetwork
       end
       
     end
+    puts @nodes; puts
+  end
+  
+  
+  
+  def report(proteins, net)
     
-    print @nodes.keys
-    puts;puts
+    gene_nodes = []
+    
+    net.nodes.each_key do |key|
+      gene_nodes.push(nodes[key]) if (nodes[key])
+    end
+    #puts gene_nodes.keys
+    
+    puts "#{gene_nodes.length} genes from the list are interacting:"
+    
+    gene_nodes.each do |gene|
+      puts "Gene #{gene.gene_ID}: #{gene.prot_name}"
+      #puts "\tKegg pathways: #{gene.kegg_path}"
+      #puts "\tGO biological process: #{GO_term[0]}"
+      puts
+    end
     
   end
- 
- 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 end

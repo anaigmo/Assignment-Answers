@@ -26,9 +26,21 @@ class Gene
   def get_attributes(kegg_pathways)
     data = access_togo(@gene_ID, "uniprot")
     @prot_name = data["entry_id"]
-    @proteins = data["accessions"]
+    @proteins = []
     @kegg_path = {}
     @GO_term = {}
+    
+    # Get the id of the protein with it interacts with
+    intact = []
+    unless (!data["dr"]["IntAct"])
+      data["dr"]["IntAct"].each do |entry|
+        intact.push(entry[0])
+      end
+    end
+    
+    data["accessions"].each do |entry|
+      @proteins.push(entry) unless (intact.include?(entry) || proteins.include?(entry))  # unless it interacts with itself
+    end
     
     data["dr"]["KEGG"].each do |entry|
       if entry[0].match(/ath/)  # Take only the IDs from Arabidopsis thaliana
@@ -48,12 +60,12 @@ class Gene
     # Take all the entries of GO in the Togo search
     if (data["dr"]["GO"])
       data["dr"]["GO"].each do |entry|
-        @GO_term[entry[0]] = entry[1]
+          @GO_term[entry[0]] = entry[1].split(":")[1] if (entry[1][0] == "P")
       end
     else
-      @GO_term = "Unknown"
+      @GO_term = "No anotated"
     end
-    
+
   end
   
 end
