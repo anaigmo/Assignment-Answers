@@ -1,5 +1,5 @@
 require 'net/http'
-require 'json' 
+require 'json'
 require './gene_class.rb'
 require './interaction_network_class.rb'
 
@@ -19,7 +19,7 @@ def create_genes(in_file, kegg_pathways)
     line = line.chomp
     new_gene = Gene.new(:gene_ID => line)  # Create the object
     new_gene.get_attributes(kegg_pathways)
-    list_genes[line] = new_gene  # Store the object in a file, with kei the variable ID
+    list_genes[line] = new_gene  # Store the object in a file, with key the variable ID
     
   end
   
@@ -127,7 +127,7 @@ def create_networks(genes, proteins)
     total_connections[key] = connections[key] unless total_connections.key?(key)
     
     connections[key].each do |prot|
-      if(total_connections.key?(prot))
+      if (total_connections.key?(prot))
         next
       elsif (connections.key?(prot))
         total_connections[prot] = connections[prot]
@@ -139,9 +139,7 @@ def create_networks(genes, proteins)
   end
   
   puts "Done"
-  
-  out_file = File.open("tconections.txt", "w")  
-  out_file.puts(total_connections.keys)
+
   
   networks = {}
   
@@ -177,18 +175,18 @@ kegg_pathways = access_kegg("ath")
 genes = create_genes(ARGV[0], kegg_pathways)
 proteins = get_proteins(genes)
 
-out_file = File.open("prots.txt", "w")  
-out_file.puts(proteins.keys)
-
 networks = create_networks(genes, proteins)
 
 count = 0
 puts "\nFINAL REPORT\n"
 
 networks.each_value do |net|
+
+  next unless net.filter(net)
+
   count += 1
   print "Network #{count}: "
-  net.report(proteins, net)
+  net.report(net)
   
 end  
 

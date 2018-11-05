@@ -13,7 +13,8 @@ class Gene
     @gene_ID = params.fetch(:gene_ID, 'unknown gene')
     abort("ERROR: Wrong gene ID, #{gene_ID}") unless @gene_ID =~ /A[Tt]\d[Gg]\d\d\d\d\d/ 
   end
-  
+
+
   def access_togo(id, database)
     address = URI("http://togows.dbcls.jp/entry/#{database}/#{id}.json")
     response = Net::HTTP.get_response(address)  
@@ -21,8 +22,7 @@ class Gene
     return data[0]
   end
   
-  
-  
+
   def get_attributes(kegg_pathways)
     data = access_togo(@gene_ID, "uniprot")
     @prot_name = data["entry_id"]
@@ -39,7 +39,7 @@ class Gene
     end
     
     data["accessions"].each do |entry|
-      @proteins.push(entry) unless (intact.include?(entry) || proteins.include?(entry))  # unless it interacts with itself
+      @proteins.push(entry) unless (proteins.include?(entry))  # unless it interacts with itself
     end
     
     data["dr"]["KEGG"].each do |entry|
