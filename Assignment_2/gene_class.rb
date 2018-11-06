@@ -30,34 +30,33 @@ class Gene
     @kegg_path = {}
     @GO_term = {}
     
-    # Get the id of the protein with it interacts with
-    intact = []
-    unless (!data["dr"]["IntAct"])
-      data["dr"]["IntAct"].each do |entry|
-        intact.push(entry[0])
-      end
-    end
+    # # Get the id of the protein with it interacts with
+    # intact = []
+    # unless (!data["dr"]["IntAct"])
+    #   data["dr"]["IntAct"].each do |entry|
+    #     intact.push(entry[0])
+    #   end
+    # end
     
     data["accessions"].each do |entry|
-      @proteins.push(entry) unless (proteins.include?(entry))  # unless it interacts with itself
+      @proteins.push(entry) unless (@proteins.include?(entry))  # unless it interacts with itself
     end
     
-    data["dr"]["KEGG"].each do |entry|
-      if entry[0].match(/ath/)  # Take only the IDs from Arabidopsis thaliana
-        
-        paths = []
-        kegg_pathways.each do |line|  # In the list of all the pathways in A. thaliana, look for the ones in which the gene is involved
-          elements = line.split("\t")
-          paths.push(elements[1]) if (elements[0] == entry[0]) 
-        end
-        
-        @kegg_path[entry[0]] = paths
-        
+    kegg_id = @gene_ID.upcase
+    paths = []
+    kegg_pathways[0].each do |line|  # In the list of all the pathways in A. thaliana, look for the ones in which the gene is involved
+      elements = line.split("\t")
+      paths.push(elements[1]) if (elements[0] == "ath:#{kegg_id}")
+    end
+
+    paths.each do |path|
+      path_num = path.split(//).last(5).join
+      if kegg_pathways[1].key?("path:map#{path_num}")
+        @kegg_path[path] = kegg_pathways[1]["path:map#{path_num}"]
       end
-      
     end
-    
-    # Take all the entries of GO in the Togo search
+
+   # Take all the entries of GO in the Togo search
     if (data["dr"]["GO"])
       data["dr"]["GO"].each do |entry|
           @GO_term[entry[0]] = entry[1].split(":")[1] if (entry[1][0] == "P")

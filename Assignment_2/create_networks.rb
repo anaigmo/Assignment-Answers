@@ -12,7 +12,7 @@ def create_genes(in_file, kegg_pathways)
   
   return false unless (File.file?(in_file))  # Check that the file exists
   
-  print "Looking for proteins associated to genes..."
+  print "Looking for proteins associated to genes... "
   
   File.open(in_file, "r").each do |line|
     
@@ -32,10 +32,21 @@ end
 
 def access_kegg(species)
   
-    address = URI("http://rest.kegg.jp/link/pathway/#{species}")
-    response = Net::HTTP.get_response(address)
-    data = response.body.split("\n")
-    return data
+  address = URI("http://rest.kegg.jp/link/pathway/#{species}")
+  response = Net::HTTP.get_response(address)
+  paths = response.body.split("\n")
+
+  address = URI("http://rest.kegg.jp/find/pathway/#{species}")
+  response = Net::HTTP.get_response(address)
+  data = response.body.split("\n")
+
+  names = {}
+  data.each do |line|
+    elements = line.chomp.split("\t")
+    names[elements[0]] = elements[1]
+  end
+
+  return [paths, names]
 
 end
   
@@ -102,7 +113,7 @@ end
 
 
 def create_networks(genes, proteins)
-  print "Connecting proteins..."
+  print "Connecting proteins... "
   connections = {}
     
   genes.each_key do |key|
@@ -120,7 +131,7 @@ def create_networks(genes, proteins)
   puts "Done"
   
   
-  print "Looking for more interactions..."
+  print "Looking for more interactions... "
   
   total_connections = {}
   connections.each_key do |key|
@@ -159,6 +170,7 @@ def create_networks(genes, proteins)
       
       networks[gene_id] = InteractionNetwork.new(:connections => new_net)  # Create object network
       networks[gene_id].get_nodes(proteins)
+      networks[gene_id].get_gnodes()
       
     end
   end
@@ -169,37 +181,35 @@ end
 
 
 
+def generate_report(networks)
+
+  out_file = File.open("Report.txt", "w")
+  count = 0
+  out_file.puts("FINAL REPORT\n\n")
+
+  networks.each_value do |net|
+
+    next unless net.filter_singles(net)
+
+    count += 1
+    out_file.print("Network #{count}: ")
+    net.report(out_file)
+
+  end
+
+  puts "A file called Report.txt has been created to contain the networks found"
+
+end
+
+
+
 ## ----- MAIN ----- ##
 
+abort("File missing. Please introduce a file with the Arabidopsis genes (ArabidopsisSubNetwork_GeneList.txt)") unless ARGV[0]
+puts "This will take a few minutes, be patient :)"
 kegg_pathways = access_kegg("ath")
 genes = create_genes(ARGV[0], kegg_pathways)
 proteins = get_proteins(genes)
-
 networks = create_networks(genes, proteins)
-
-count = 0
-puts "\nFINAL REPORT\n"
-
-networks.each_value do |net|
-
-  next unless net.filter(net)
-
-  count += 1
-  print "Network #{count}: "
-  net.report(net)
-  
-end  
-
-
-
-
-
-
-
-
-
-
-
-
-
+generate_report(networks)
 

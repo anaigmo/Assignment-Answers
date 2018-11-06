@@ -2,12 +2,15 @@ class InteractionNetwork
   
   attr_accessor :nodes 
   attr_accessor :connections
+  attr_accessor :gene_nodes
   
   def initialize (params = {})
-   @connections = params.fetch(:connections, FALSE)
-   @nodes = {}
+    @connections = params.fetch(:connections, FALSE)
+    @nodes = {}
+    @gene_nodes = []
   end
- 
+
+
   def get_nodes(proteins)
 
     no_prots = []  ## hey
@@ -36,22 +39,18 @@ class InteractionNetwork
   end
   
 
-  def get_gnodes(net)
-    gene_nodes = []
+  def get_gnodes()
 
-    net.nodes.each_key do |key|
-      gene_nodes.push(nodes[key]) if (nodes[key])
+    @nodes.each_value do |node|
+      @gene_nodes.push(node) if (node)
     end
-
-    return gene_nodes
 
   end
 
 
-  def filter(net)
-    gene_nodes = get_gnodes(net)
+  def filter_singles(net)
 
-    if gene_nodes.length <= 1
+    if @gene_nodes.length <= 1
       return FALSE
     else
       return TRUE
@@ -60,32 +59,30 @@ class InteractionNetwork
   end
 
 
-  def report(net)
+  def report(out_file)
+
     
-    gene_nodes = get_gnodes(net)
+    out_file.puts("#{@gene_nodes.length} genes from the list are interacting:")
     
-    puts "#{gene_nodes.length} genes from the list are interacting:"
-    
-    gene_nodes.each do |gene|
-      puts "Gene #{gene.gene_ID}: #{gene.prot_name}"
-      #puts "\tKegg pathways: #{gene.kegg_path}"
-      #puts "\tGO biological process: #{gene.GO_term}"
-      puts
+    @gene_nodes.each do |gene|
+      out_file.puts("Gene #{gene.gene_ID}: #{gene.prot_name}")
+
+      out_file.puts("\tKegg pathways: ")
+      gene.kegg_path.each_key do |key|
+        out_file.puts("\t\t#{[key][0]}: #{gene.kegg_path[key]}")
+      end
+
+      out_file.puts("\tGO biological process:")
+      gene.GO_term.each_key do |key|
+        out_file.puts("\t\t#{[key][0]}: #{gene.GO_term[key]}")
+      end
+
+      out_file.puts()
     end
 
-    puts net.connections; puts; puts
+    out_file.puts("#{@connections}\n\n")
 
   end
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   
 end
