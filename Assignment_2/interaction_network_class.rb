@@ -12,34 +12,37 @@ class InteractionNetwork
 
 
   def get_nodes(proteins)
+    # This function finds out which proteins in the net come from the list of genes and saves the gene object
+    # associated in a hash, the variable nodes. If the protein doesn't have a gene associated, it is assigned
+    # the value FALSE.
 
-    no_prots = []  ## hey
     @connections.each_key do |key|
 
+      # Nodes for the keys in the hash
       if (proteins.key?(key))
          @nodes[key] = proteins[key]  # Correspond to a gene in the list
       else
         @nodes[key] = FALSE  # The protein doesn't come from a gene of the list
       end
 
+      # Nodes for the values
       @connections[key].each do |prot|
-        no_prots.push(prot)
+
         if (nodes.key?(prot))
           next
         elsif (proteins.key?(prot))
-          @nodes[prot] = proteins[prot]
+          @nodes[prot] = proteins[prot]  # Correspond to a gene in the list
         else
           @nodes[prot] = FALSE  # The protein doesn't come from a gene of the list
         end
         
       end
-      
     end
-
   end
   
 
   def get_gnodes()
+    # This function saves in an array the gene objects of the proteins in the variable nodes
 
     @nodes.each_value do |node|
       @gene_nodes.push(node) if (node)
@@ -48,19 +51,8 @@ class InteractionNetwork
   end
 
 
-  def filter_singles(net)
-
-    if @gene_nodes.length <= 1
-      return FALSE
-    else
-      return TRUE
-    end
-
-  end
-
-
   def report(out_file)
-
+    # This function prints in a file the characteristics of the genes interacting in the net
     
     out_file.puts("#{@gene_nodes.length} genes from the list are interacting:")
     
