@@ -67,14 +67,19 @@ class InteractionNetwork
     @gene_nodes.each do |gene|
       out_file.puts("Gene #{gene.gene_ID}: #{gene.prot_name}")
 
+      out_file.puts("\tProtein IDs:")
+      gene.proteins.each do |prot|
+        out_file.puts("\t\t#{prot}")
+      end
+
       out_file.puts("\tKegg pathways: ")
       gene.kegg_path.each_key do |key|
         out_file.puts("\t\t#{[key][0]}: #{gene.kegg_path[key]}")
       end
 
       out_file.puts("\tGO biological process:")
-      gene.GO_term.each_key do |key|
-        out_file.puts("\t\t#{[key][0]}: #{gene.GO_term[key]}")
+      gene.go_term.each_key do |key|
+        out_file.puts("\t\t#{[key][0]}: #{gene.go_term[key]}")
       end
 
       out_file.puts()

@@ -7,7 +7,7 @@ class Gene
   attr_accessor :prot_name
   attr_accessor :proteins
   attr_accessor :kegg_path
-  attr_accessor :GO_term
+  attr_accessor :go_term
   
   def initialize (params = {})
     @gene_ID = params.fetch(:gene_ID, 'unknown gene')
@@ -28,7 +28,7 @@ class Gene
     @prot_name = data["entry_id"]
     @proteins = []
     @kegg_path = {}
-    @GO_term = {}
+    @go_term = {}
     
     # # Get the id of the protein with it interacts with
     # intact = []
@@ -59,10 +59,10 @@ class Gene
    # Take all the entries of GO in the Togo search
     if (data["dr"]["GO"])
       data["dr"]["GO"].each do |entry|
-          @GO_term[entry[0]] = entry[1].split(":")[1] if (entry[1][0] == "P")
+          @go_term[entry[0]] = entry[1].split(":")[1] if (entry[1][0] == "P")
       end
     else
-      @GO_term = "No anotated"
+      @go_term = "No anotated"
     end
 
   end

@@ -187,12 +187,23 @@ def generate_report(networks)
   count = 0
   out_file.puts("FINAL REPORT\n\n")
 
+
+  gnodes = []
   networks.each_value do |net|
 
     next unless net.filter_singles(net)
 
+    net_gnodes = []
+    net.gene_nodes.each do |gene|
+      net_gnodes.push(gene.gene_ID)
+    end
+
+    next if gnodes.include?(net_gnodes.sort())
+
+    gnodes.push(net_gnodes.sort())
+
     count += 1
-    out_file.print("Network #{count}: ")
+    out_file.print("## NETWORK #{count}: ")
     net.report(out_file)
 
   end
@@ -212,4 +223,3 @@ genes = create_genes(ARGV[0], kegg_pathways)
 proteins = get_proteins(genes)
 networks = create_networks(genes, proteins)
 generate_report(networks)
-
