@@ -81,5 +81,5 @@ class InteractionNetwork
 
   end
 
-  
+
 end

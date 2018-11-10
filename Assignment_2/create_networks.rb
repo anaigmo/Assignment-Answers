@@ -1,3 +1,7 @@
+# This program has been created by Ana Iglesias Molina for the subject Bioinformatics Programming Challenges.
+# Given a file with a list of genes of Arabidopsis thaliana, the interactions of their proteins are searched
+# to create networks with two levels of depth. This networks are then written in the file 'Report.txt'.
+
 require 'net/http'
 require 'json'
 require './gene_class.rb'
@@ -78,22 +82,22 @@ def get_connections(prot)
   
   interactions = []
 
-  if (tab25)
+  if tab25
      
     tab25.each do |int|
 
       column = int.split("\t")
 
       # Filter interactions by species and method of discovery of the interaction
-      if (column[9]=~/taxid:3702/ && column[10]=~/taxid:3702/ && (column[6]=~/MI:(0006|0007|0047|0055|0065|0084|0096|0402|0676|1356)/))
+      if column[9]=~/taxid:3702/ && column[10]=~/taxid:3702/ && (column[6]=~/MI:(0006|0007|0047|0055|0065|0084|0096|0402|0676|1356|0071|0112|0663)/)
         ids = []
         ids.push(column[0].split(":")[1])
         ids.push(column[1].split(":")[1])
 
         # The ID of the interacting protein can be in the first or the second column
-        if (ids[0] != prot && !interactions.include?(ids[0]))
+        if ids[0] != prot && !interactions.include?(ids[0])
           interactions.push(ids[0])
-        elsif (ids[1] != prot && !interactions.include?(ids[1]))
+        elsif ids[1] != prot && !interactions.include?(ids[1])
           interactions.push(ids[1])
         end
             
@@ -209,22 +213,11 @@ def generate_report(networks)
 
   out_file = File.open("Report.txt", "w")
 
-  count = 0  # Count of the networks
   out_file.puts("FINAL REPORT\n\n")
 
-  gnodes = []
+  count = 0  # Count of the networks
+
   networks.each_value do |net|
-
-    next unless net.gene_nodes.length > 1  # Doesn't print the nets with only one gene interacting
-
-    net_gnodes = []  # Names of the genes interacting in the net
-    net.gene_nodes.each do |gene|
-      net_gnodes.push(gene.gene_ID)
-    end
-
-    next if gnodes.include?(net_gnodes.sort())  # Doesn't print the nets with the same genes interacting
-
-    gnodes.push(net_gnodes.sort())
 
     count += 1
     out_file.print("## NETWORK #{count}: ")
@@ -233,6 +226,28 @@ def generate_report(networks)
   end
 
   puts "A file called Report.txt has been created to contain the found networks"
+
+end
+
+
+
+def filter_nets(networks)
+  # This function checks if a net contains other nets or there's only one gene in it and deletes it
+
+  networks.each_value do |net|
+    next if net.gene_nodes.length <= 1  # It will be deleted in the next step
+
+    networks.each_key do |key|
+
+      if net != networks[key] && (networks[key].gene_nodes.all? {|e| net.gene_nodes.include?(e)} || networks[key].gene_nodes.length <= 1)
+        networks.delete(key)
+      end
+
+    end
+
+  end
+
+  return networks
 
 end
 
@@ -250,5 +265,7 @@ genes = create_genes(ARGV[0])  # Create gene objects from the list in the file g
 proteins = get_proteins(genes)  # Hash that contains the protein IDs as keys, and their related gene as value
 
 networks = create_networks(genes, proteins)  # Find out the networks of interacting proteins with two levels of depth
+
+networks = filter_nets(networks)  # Delete all the invalid networks
 
 generate_report(networks)  # Prints the found networks in a file
