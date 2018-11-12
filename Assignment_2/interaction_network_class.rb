@@ -77,6 +77,7 @@ class InteractionNetwork
       out_file.puts()
     end
 
+    out_file.puts("Conections:")
     out_file.puts("#{@connections}\n\n")
 
   end

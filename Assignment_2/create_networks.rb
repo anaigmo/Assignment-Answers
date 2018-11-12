@@ -88,8 +88,9 @@ def get_connections(prot)
 
       column = int.split("\t")
 
-      # Filter interactions by species and method of discovery of the interaction
-      if column[9]=~/taxid:3702/ && column[10]=~/taxid:3702/ && (column[6]=~/MI:(0006|0007|0047|0055|0065|0084|0096|0402|0676|1356|0071|0112|0663)/)
+      # Filter interactions by species, score > 0.3 and method of discovery of the interaction
+      if column[9]=~/taxid:3702/ && column[10]=~/taxid:3702/ && column[14][15..18].to_f > 0.3 &&
+          (column[6]=~/MI:(0006|0007|0047|0055|0065|0084|0096|0402|0676|1356|0071|0112|0663)/)
         ids = []
         ids.push(column[0].split(":")[1])
         ids.push(column[1].split(":")[1])
@@ -208,6 +209,28 @@ end
 
 
 
+def filter_nets(networks)
+  # This function checks if a net contains other nets or there's only one gene in it and deletes it
+
+  networks.each_value do |net|
+    next if net.gene_nodes.length <= 1  # It will be deleted in the next step
+
+    networks.each_key do |key|
+
+      if net != networks[key] && (networks[key].gene_nodes.all? {|e| net.gene_nodes.include?(e)} || networks[key].gene_nodes.length <= 1)
+        networks.delete(key)
+      end
+
+    end
+
+  end
+
+  return networks
+
+end
+
+
+
 def generate_report(networks)
   # This function prints the networks in a file called 'Report.txt'. It also filters the nets, as not everyone is valid
 
@@ -226,28 +249,6 @@ def generate_report(networks)
   end
 
   puts "A file called Report.txt has been created to contain the found networks"
-
-end
-
-
-
-def filter_nets(networks)
-  # This function checks if a net contains other nets or there's only one gene in it and deletes it
-
-  networks.each_value do |net|
-    next if net.gene_nodes.length <= 1  # It will be deleted in the next step
-
-    networks.each_key do |key|
-
-      if net != networks[key] && (networks[key].gene_nodes.all? {|e| net.gene_nodes.include?(e)} || networks[key].gene_nodes.length <= 1)
-        networks.delete(key)
-      end
-
-    end
-
-  end
-
-  return networks
 
 end
 
