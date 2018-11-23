@@ -1,0 +1,113 @@
+### ---------- ASIGNMENT 5 ---------- ### 
+##   -------------------------------
+#     -----  SPARQL queries  -----     #
+
+
+# COMMON PREFIXES 
+
+PREFIX up:<http://purl.uniprot.org/core/> 
+PREFIX keywords:<http://purl.uniprot.org/keywords/> 
+PREFIX uniprotkb:<http://purl.uniprot.org/uniprot/> 
+PREFIX taxon:<http://purl.uniprot.org/taxonomy/> 
+PREFIX ec:<http://purl.uniprot.org/enzyme/> 
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+
+
+
+## QUERY 1  --> How many protein records are in UniProt?
+
+SELECT (COUNT(DISTINCT ?protein) AS ?countProtein)
+WHERE
+{
+    ?protein a up:Protein .
+}
+
+
+
+## QUERY 2  --> How many Arabidopsis thaliana protein records are in UniProt?
+
+SELECT (COUNT(DISTINCT ?protein) AS ?countProtein)
+WHERE
+{
+  ?protein a up:Protein ;
+             up:organism taxon:3702 .
+}
+
+
+
+## QUERY 3 --> What is the description of the enzyme activity of UniProt Protein Q9SZZ8
+
+SELECT DISTINCT ?comment
+WHERE
+{
+  ?protein a up:Protein ;
+             up:replacedBy ?id ;
+             up:replacedBy uniprotkb:Q9SZZ8 .
+             
+  ?id up:annotation ?annotation .
+  ?annotation rdfs:comment ?comment .
+}
+
+
+
+## QUERY 4 -->  Retrieve the proteins ids, and date of submission, for proteins that have 
+# been added to UniProt this year 
+
+SELECT ?id ?date
+WHERE
+{
+  ?protein a up:Protein ;
+             up:replacedBy ?id ;
+             up:created ?date .
+  FILTER( ?date >= xsd:date("2018-01-01"))
+}
+
+
+
+
+## QUERY 5 --> How many species are in the UniProt taxonomy?     972351
+
+SELECT (COUNT(DISTINCT ?taxons) AS ?countOrganisms)
+WHERE
+{
+  ?protein a up:Protein ;
+             up:organism ?taxons .
+}
+
+
+
+## QUERY 6 --> How many species have at least one protein record?
+
+# ESTÁ MAAAAAAAL
+
+SELECT (COUNT(DISTINCT ?taxons) AS ?countOrganisms)
+WHERE
+{
+  ?protein a up:Protein ;
+             up:organism ?taxons .
+}
+GROUP BY ?taxons
+HAVING(COUNT(?protein) > 0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
