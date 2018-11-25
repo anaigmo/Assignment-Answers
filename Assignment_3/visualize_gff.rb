@@ -78,16 +78,32 @@ end
 
 
 
-def add_feature(gene, feat, strand, pattern)
+def add_feature(gene, feat, strand, pattern, added_feats)
 
-  pos = /(\d+)\.\.(\d+)/.match(feat.position)
+  pos_raw = /(\d+)\.\.(\d+)/.match(feat.position)
+  pos_exon = [pos_raw[1].to_i, pos_raw[2].to_i]
 
-  seq = gene.seq[pos[1].to_i..pos[2].to_i]
+  seq = gene.seq[pos_exon[0]..pos_exon[1]]
 
   match_begin = []
   seq.scan(pattern) {match_begin.push($~.begin(0))}
 
-  new_feats = create_feature(match_begin, strand)
+  pos_repeat = []
+  match_begin.each do |pos|
+
+    npos = pos + pos_exon[0]  # desfase por encontrar la repeticion ASLDKFJAÑSGAÑWEOGNAÑLKÑALSRKFJAÑERKJL ¿FALTA +1?
+    next if added_feats.include?(npos)  # Removes duplicates
+
+    next unless pattern.match(seq[pos+3..pos+5])  # complete repetition
+
+    pos_repeat.push(npos)
+    added_feats.push(npos)
+
+  end
+
+
+
+  new_feats = create_feature(pos_repeat, strand)
 
   new_feats.each do |nfeat|
     gene.features << nfeat
@@ -97,10 +113,10 @@ end
 
 
 
-def write_gff(genes)
+def write_gff3(genes)
 
-  out_file = File.open("Repeats.gff.txt", "w")  ## quita el txt
-
+  out_file = File.open("Repeats.gff3", "w")
+  out_file.puts("##gff-version 3")
   no_repeats = []
 
   genes.each_key do |key|
@@ -112,14 +128,13 @@ def write_gff(genes)
 
       next unless feat.feature == "repeat"
 
-      pos_match = /(\d+)\.\.(\d+)/.match(feat.position)
-      pos = [pos_match[1].to_i+1, pos_match[2].to_i+1]
-      strand = feat.assoc["strand"]
-      att = "geneID=#{key};repeat_motif=#{feat.assoc["repeat_motif"]}"
-
-      out_file.puts("#{gene.primary_accession}\tEMBL\trepeat_unit\t#{pos[0]}\t#{pos[1]}\t.\t#{strand}\t.\t#{att}")
-
       count += 1
+      pos_match = /(\d+)\.\.(\d+)/.match(feat.position)
+      pos = [pos_match[1].to_i, pos_match[2].to_i]
+      strand = feat.assoc["strand"]
+      att = "ID=#{key}_CTTCTT_#{count};name=repeat_CTTCTT"
+
+      out_file.puts("Chr#{gene.entry_id}\tEMBL\trepeat_unit\t#{pos[0]}\t#{pos[1]}\t.\t#{strand}\t.\t#{att}")
 
     end
 
@@ -128,7 +143,7 @@ def write_gff(genes)
   end
 
   out_file.close
-  puts "A file 'Repeats.gff' containing the new features that describe the pattern found in the exons of the genes given has been created."
+  puts "A file 'Repeats.gff3' containing the new features that describe the pattern found in the exons of the genes given has been created."
 
   report_no_repeats(no_repeats) if no_repeats != []
 
@@ -144,33 +159,36 @@ def report_no_repeats(no_repeats)
     out_file.puts(gene)
   end
 
-  puts "Some genes doesn't present the pattern 'CTTCTT' in any exon."
-  puts "They are contained in the file 'No_repeats_genes.txt'"
+  print "Some genes doesn't present the pattern 'CTTCTT' in any exon."
+  puts "They are contained in the file 'No_repeats_genes.txt.'"
 
 end
 
 
 
-def write_better_gff(genes)
+def write_gff3_chr(genes)
 
-  out_file = File.open("Repeats_2.gff.txt", "w")  ## quita el txt
+  out_file = File.open("Repeats_chr.gff3", "w")
+  out_file.puts("##gff-version 3")
 
   genes.each_key do |key|
 
     gene = genes[key].to_biosequence
+    count = 0
 
     gene.features.each do |feat|
 
       next unless feat.feature == "repeat"
 
+      count += 1
       pos_match = /(\d+)\.\.(\d+)/.match(feat.position)
 
       p_accession = gene.primary_accession.split(":")
       ref = p_accession[3].to_i  # position where the gene starts in the genome coordinates reference
 
-      pos = [pos_match[1].to_i + 1 + ref, pos_match[2].to_i + 1 + ref]
+      pos = [pos_match[1].to_i + ref, pos_match[2].to_i + ref]
       strand = feat.assoc["strand"]
-      att = "geneID=#{key};repeat_motif=#{feat.assoc["repeat_motif"]}"
+      att = "ID=#{key}_CTTCTT_#{count};name=repeat_CTTCTT"
 
       out_file.puts("Chr#{gene.entry_id}\tEMBL\trepeat_unit\t#{pos[0]}\t#{pos[1]}\t.\t#{strand}\t.\t#{att}")
 
@@ -179,7 +197,7 @@ def write_better_gff(genes)
   end
 
   out_file.close
-  puts "A file 'Repeats_2.gff' with different coordinates has been created."
+  puts "A file 'Repeats_chr.gff3' with different coordinates has been created."
 
 end
 
@@ -196,17 +214,18 @@ genes = get_genes(ARGV[0])  # Create gene objects from the list in the file give
 genes.each_value do |gene|
 
   gene = gene.to_biosequence
+  added_feats = []
 
   gene.features.each do |feat|
 
     if feat.feature == "exon"
 
-      if /:/.match(feat.position)  ## referidos a un gen y join
+      if /:/.match(feat.position)  ## referidos a un gen
         next
       elsif /complement/.match(feat.position)
-        add_feature(gene, feat, "-", /aagaag/)
+        add_feature(gene, feat, "-", /aag/, added_feats)
       else
-        add_feature(gene, feat, "+", /cttctt/)
+        add_feature(gene, feat, "+", /ctt/, added_feats)
       end
 
     end
@@ -216,6 +235,6 @@ genes.each_value do |gene|
 end
 
 
-write_gff(genes)
+write_gff3(genes)
 
-write_better_gff(genes)
+write_gff3_chr(genes)
