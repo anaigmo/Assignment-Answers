@@ -6,7 +6,7 @@
 # the file, and looks for the repetition 'CTTCTT' in its exons' sequences. When it finds one, it saves it as
 # a Bio::Feature object in the Bio::EMBL object of its correspondent gene. All the new features created are
 # later printed in two gff3 files, one with the positions referred to the gene, and the other to the chromosome.
-# Moreover, the genes which doesn't contain this repetition are saved as a list in the file 'No_repeats_genes.txt'.
+# Moreover, the genes which don't contain this repetition are saved as a list in the file 'No_repeats_genes.txt'.
 #
 
 require 'bio'
@@ -114,7 +114,6 @@ def create_feature(beginning, strand)
     end
 
     nfeat.append(Bio::Feature::Qualifier.new('repeat_motif', 'CTTCTT'))
-    nfeat.append(Bio::Feature::Qualifier.new('note', 'found branded new'))  # en fin
     nfeat.append(Bio::Feature::Qualifier.new('strand', strand))
 
     new_feats.push(nfeat)
