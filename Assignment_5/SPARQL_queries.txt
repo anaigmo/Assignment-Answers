@@ -1,15 +1,13 @@
 ### ---------- ASIGNMENT 5 ---------- ### 
-##   -------------------------------
-#     -----  SPARQL queries  -----     #
+##   -------------------------------   ##
+#     -----  SPARQL queries  -----      #
 
 
-# COMMON PREFIXES 
+# COMMON PREFIXES FOR QUERIES 1-6
 
-PREFIX up:<http://purl.uniprot.org/core/> 
-PREFIX keywords:<http://purl.uniprot.org/keywords/> 
+PREFIX up:<http://purl.uniprot.org/core/>
 PREFIX uniprotkb:<http://purl.uniprot.org/uniprot/> 
 PREFIX taxon:<http://purl.uniprot.org/taxonomy/> 
-PREFIX ec:<http://purl.uniprot.org/enzyme/> 
 PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
 
@@ -66,29 +64,29 @@ WHERE
 
 
 
-## QUERY 5 --> How many species are in the UniProt taxonomy?     972351
+## QUERY 5 --> How many species are in the UniProt taxonomy?     1601900
 
-SELECT (COUNT(DISTINCT ?taxons) AS ?countOrganisms)
+SELECT (COUNT(DISTINCT ?taxon) AS ?countSpecies)
 WHERE
 {
-  ?protein a up:Protein ;
-             up:organism ?taxons .
+  ?taxon a up:Taxon ;
+           up:rank up:Species .
+           
 }
 
 
 
-## QUERY 6 --> How many species have at least one protein record?
+## QUERY 6 --> How many species have at least one protein record?     833130
 
-# ESTÁ MAAAAAAAL
-
-SELECT (COUNT(DISTINCT ?taxons) AS ?countOrganisms)
+SELECT (COUNT(DISTINCT ?taxon) AS ?countSpecies)
 WHERE
 {
   ?protein a up:Protein ;
-             up:organism ?taxons .
+             up:organism ?taxon .
+  ?taxon a up:Taxon ;
+           up:rank up:Species .
+           
 }
-GROUP BY ?taxons
-HAVING(COUNT(?protein) > 0)
 
 
 
@@ -96,7 +94,30 @@ HAVING(COUNT(?protein) > 0)
 
 
 
+COMMON PREFIXES FOR QUERIES 7, 8
 
+PREFIX atlasterms:<http://rdf.ebi.ac.uk/terms/expressionatlas/>
+PREFIX gene: <http://rdf.ebi.ac.uk/resource/ensembl/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+
+## QUERY 7 --> What is the Affymetrix probe ID for the Arabiodopsis Apetala3 gene? (HINT - you cannot answer this directly from Atlas - you will first have to look at what kinds of database cross-references are in Atlas, and then construct the appropriate URI for the Apetala3 gene based on its ID number in *that* database)
+
+
+
+## QUERY 8 --> Get the experimental description for all experiments where the Arabidopsis Apetala3
+ 
+
+SELECT ?description   ?pvalue   ?tstat
+FROM <http://rdf.ebi.ac.uk/dataset/expressionatlas>
+WHERE {
+	?expression  atlasterms:refersTo   gene:AT3G54340 ;
+        	     atlasterms:isOutputOf ?analysis ;
+        	     atlasterms:pValue ?pvalue ;
+        	     atlasterms:tStatistic ?tstat .
+	?analysis  rdfs:label    ?description .
+	FILTER(?tstat < -3)
+}
 
 
 
