@@ -1,19 +1,16 @@
-### ---------- ASIGNMENT 5 ---------- ### 
-##   -------------------------------   ##
-#     -----  SPARQL queries  -----      #
+### -------------------------- ASIGNMENT 5 -------------------------- ### 
+##   ---------------------------------------------------------------   ##
+#     -------------------    SPARQL queries  ---------------------      #
 
 
-# COMMON PREFIXES FOR QUERIES 1-6
+# Asignment 5 created by Ana Iglesias Molina for the subject Bioinformatic Programming Challenges
+
+
+## ------------------------- UNIPROT QUERIES ------------------------- ##
+
+## QUERY 1 --> How many protein records are in UniProt?
 
 PREFIX up:<http://purl.uniprot.org/core/>
-PREFIX uniprotkb:<http://purl.uniprot.org/uniprot/> 
-PREFIX taxon:<http://purl.uniprot.org/taxonomy/> 
-PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
-
-
-
-## QUERY 1  --> How many protein records are in UniProt?
 
 SELECT (COUNT(DISTINCT ?protein) AS ?countProtein)
 WHERE
@@ -24,6 +21,10 @@ WHERE
 
 
 ## QUERY 2  --> How many Arabidopsis thaliana protein records are in UniProt?
+
+PREFIX up:<http://purl.uniprot.org/core/>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX taxon:<http://purl.uniprot.org/taxonomy/> 
 
 SELECT (COUNT(DISTINCT ?protein) AS ?countProtein)
 WHERE
@@ -36,56 +37,74 @@ WHERE
 
 ## QUERY 3 --> What is the description of the enzyme activity of UniProt Protein Q9SZZ8
 
-SELECT DISTINCT ?comment
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX uniprotkb:<http://purl.uniprot.org/uniprot/>  
+PREFIX up:<http://purl.uniprot.org/core/> 
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#> 
+
+SELECT DISTINCT ?name ?act
 WHERE
 {
-  ?protein a up:Protein ;
-             up:replacedBy ?id ;
-             up:replacedBy uniprotkb:Q9SZZ8 .
-             
-  ?id up:annotation ?annotation .
-  ?annotation rdfs:comment ?comment .
+  uniprotkb:Q9SZZ8 a up:Protein ;
+                   up:enzyme ?enzyme .
+  
+  ?enzyme skos:prefLabel ?name ;
+          up:activity ?activity .
+  
+  ?activity rdfs:label ?act .
+  	
 }
 
 
 
-## QUERY 4 -->  Retrieve the proteins ids, and date of submission, for proteins that have 
-# been added to UniProt this year 
+## QUERY 4 -->  Retrieve the proteins ids, and date of submission, for proteins that have been added to UniProt this year 
 
-SELECT ?id ?date
+PREFIX up:<http://purl.uniprot.org/core/>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?protein ?id ?date
 WHERE
 {
   ?protein a up:Protein ;
-             up:replacedBy ?id ;
+             up:mnemonic ?id ;
              up:created ?date .
+
   FILTER( ?date >= xsd:date("2018-01-01"))
 }
 
 
 
 
-## QUERY 5 --> How many species are in the UniProt taxonomy?     1601900
+## QUERY 5 --> How many species are in the UniProt taxonomy? 
+
+PREFIX up:<http://purl.uniprot.org/core/>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 
 SELECT (COUNT(DISTINCT ?taxon) AS ?countSpecies)
 WHERE
 {
   ?taxon a up:Taxon ;
            up:rank up:Species .
-           
 }
 
 
 
-## QUERY 6 --> How many species have at least one protein record?     833130
+## QUERY 6 --> How many species have at least one protein record? 
+
+PREFIX up:<http://purl.uniprot.org/core/>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 
 SELECT (COUNT(DISTINCT ?taxon) AS ?countSpecies)
 WHERE
 {
   ?protein a up:Protein ;
-             up:organism ?taxon .
+           up:organism ?taxon .
+
   ?taxon a up:Taxon ;
-           up:rank up:Species .
-           
+         up:rank up:Species .
 }
 
 
@@ -94,27 +113,43 @@ WHERE
 
 
 
-COMMON PREFIXES FOR QUERIES 7, 8
+## ------------------------- ATLAS GENE EXPRESSION QUERIES ------------------------- ##
 
-PREFIX atlasterms:<http://rdf.ebi.ac.uk/terms/expressionatlas/>
-PREFIX gene: <http://rdf.ebi.ac.uk/resource/ensembl/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 
 ## QUERY 7 --> What is the Affymetrix probe ID for the Arabiodopsis Apetala3 gene? (HINT - you cannot answer this directly from Atlas - you will first have to look at what kinds of database cross-references are in Atlas, and then construct the appropriate URI for the Apetala3 gene based on its ID number in *that* database)
+
+PREFIX atlasterms:<http://rdf.ebi.ac.uk/terms/expressionatlas/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT  DISTINCT  ?probe 
+WHERE {
+  ?gene rdfs:label 'AP3' .
+
+  ?expression atlasterms:refersTo   ?gene ;
+              atlasterms:refersTo ?probe ;
+              rdfs:label ?label .
+
+  FILTER (!regex(?probe,'http://rdf.ebi.ac.uk/resource/ensembl/AT3G54340')) .
+  FILTER (!regex(?probe,'http://identifiers.org/ensembl.plant/AT3G54340')) .               
+}
+
 
 
 
 ## QUERY 8 --> Get the experimental description for all experiments where the Arabidopsis Apetala3
  
+PREFIX atlasterms:<http://rdf.ebi.ac.uk/terms/expressionatlas/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?description   ?pvalue   ?tstat
-FROM <http://rdf.ebi.ac.uk/dataset/expressionatlas>
+SELECT DISTINCT ?description   ?pvalue   ?tstat
 WHERE {
-	?expression  atlasterms:refersTo   gene:AT3G54340 ;
-        	     atlasterms:isOutputOf ?analysis ;
-        	     atlasterms:pValue ?pvalue ;
-        	     atlasterms:tStatistic ?tstat .
+   ?gene rdfs:label 'AP3' .
+
+   ?expression  atlasterms:refersTo   ?gene ;
+        atlasterms:isOutputOf ?analysis ;
+        atlasterms:pValue ?pvalue ;
+        atlasterms:tStatistic ?tstat .
 	?analysis  rdfs:label    ?description .
 	FILTER(?tstat < -3)
 }
@@ -123,12 +158,91 @@ WHERE {
 
 
 
+## ------------------------- REACTOME QUERIES ------------------------- ##
+
+
+## QUERY 9 --> How many REACTOME pathways are assigned to Arabidopsis (taxon 3702)?
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX biopax3: <http://www.biopax.org/release/biopax-level3.owl#>
+PREFIX tax: <http://identifiers.org/taxonomy/>
+
+SELECT (COUNT (DISTINCT ?pathway) AS ?countPathways)
+WHERE {
+  ?pathway rdf:type biopax3:Pathway ;
+           biopax3:organism tax:3702 .
+}
+
+
+## QUERY 10 --> Get all PubMed references for the pathway with the name “Degradation of the
+ extracellular matrix”
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX biopax3: <http://www.biopax.org/release/biopax-level3.owl#>
+
+SELECT DISTINCT ?idPubmed ?title
+WHERE {
+  ?pathway rdf:type biopax3:Pathway ;
+           biopax3:displayName ?name ;
+           biopax3:xref ?ref .
+
+  ?ref biopax3:db ?database ;
+       biopax3:title ?title ;
+       biopax3:id ?idPubmed
+  
+  FILTER(str(?name) = 'Degradation of the extracellular matrix') .
+  FILTER(str(?database) = 'Pubmed') .
+}
 
 
 
 
+## ------------------------- BONUS QUERIES ------------------------- ##
+
+## QUERY 11 --> find the AGI codes and gene names for all Arabidopsis thaliana proteins that have a protein function annotation description that mentions "pattern formation"
+
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX up:<http://purl.uniprot.org/core/>
+PREFIX taxon:<http://purl.uniprot.org/taxonomy/> 
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?agiCode ?geneName
+WHERE
+{
+  ?protein a up:Protein ;
+             up:organism taxon:3702 ;
+             up:annotation ?annotation ;
+             up:encodedBy ?gene.
+  
+  ?gene up:locusName ?agiCode ;
+        skos:prefLabel ?geneName .
+  
+  ?annotation rdfs:comment ?comment .
+  
+  FILTER CONTAINS(str(?comment), 'pattern formation')
+}
+  
 
 
+## QUERY 12 --> write a query that proves that all Arabidopsis pathway annotations in Reactome are “inferred from electronic annotation” (evidence code) (...and therefore are probably garbage!)
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX biopax3: <http://www.biopax.org/release/biopax-level3.owl#>
+
+SELECT (COUNT (DISTINCT ?totalEvidence) AS ?countTotalEvidence) (COUNT (DISTINCT ?electronicEvidence) AS ?countElectronicEvidence)
+WHERE {
+  ?pathway rdf:type biopax3:Pathway ;
+           biopax3:organism tax:3702 ;
+           biopax3:evidence ?totalEvidence ;
+           biopax3:evidence ?electronicEvidence .
+
+  ?electronicEvidence biopax3:comment ?comment ;
+                      biopax3:evidenceCode ?eviCode .
+
+  ?eviCode biopax3:term ?term .
+  
+  FILTER(str(?term) = 'inferred from electronic annotation')
+}
 
 
 
