@@ -119,19 +119,21 @@ WHERE
 
 ## QUERY 7 --> What is the Affymetrix probe ID for the Arabiodopsis Apetala3 gene? (HINT - you cannot answer this directly from Atlas - you will first have to look at what kinds of database cross-references are in Atlas, and then construct the appropriate URI for the Apetala3 gene based on its ID number in *that* database)
 
+
 PREFIX atlasterms:<http://rdf.ebi.ac.uk/terms/expressionatlas/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT  DISTINCT  ?probe 
+SELECT  DISTINCT ?probe_id
 WHERE {
   ?gene rdfs:label 'AP3' .
 
   ?expression atlasterms:refersTo   ?gene ;
-              atlasterms:refersTo ?probe ;
-              rdfs:label ?label .
+              atlasterms:refersTo ?probe .
 
-  FILTER (!regex(?probe,'http://rdf.ebi.ac.uk/resource/ensembl/AT3G54340')) .
-  FILTER (!regex(?probe,'http://identifiers.org/ensembl.plant/AT3G54340')) .               
+  ?probe rdfs:label ?probe_id .
+
+  FILTER CONTAINS(str(?probe), "AFFY")
+
 }
 
 
@@ -228,6 +230,7 @@ WHERE
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX biopax3: <http://www.biopax.org/release/biopax-level3.owl#>
+PREFIX tax: <http://identifiers.org/taxonomy/>
 
 SELECT (COUNT (DISTINCT ?totalEvidence) AS ?countTotalEvidence) (COUNT (DISTINCT ?electronicEvidence) AS ?countElectronicEvidence)
 WHERE {
