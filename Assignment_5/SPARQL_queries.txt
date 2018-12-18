@@ -3,10 +3,12 @@
 #     -------------------    SPARQL queries  ---------------------      #
 
 
-# Asignment 5 created by Ana Iglesias Molina for the subject Bioinformatic Programming Challenges
+# Assignment 5 created by Ana Iglesias Molina for the subject Bioinformatic Programming Challenges
+
 
 
 ## ------------------------- UNIPROT QUERIES ------------------------- ##
+
 
 ## QUERY 1 --> How many protein records are in UniProt?
 
@@ -30,7 +32,7 @@ SELECT (COUNT(DISTINCT ?protein) AS ?countProtein)
 WHERE
 {
   ?protein a up:Protein ;
-             up:organism taxon:3702 .
+           up:organism taxon:3702 .
 }
 
 
@@ -69,12 +71,11 @@ SELECT ?protein ?id ?date
 WHERE
 {
   ?protein a up:Protein ;
-             up:mnemonic ?id ;
-             up:created ?date .
+           up:mnemonic ?id ;
+           up:created ?date .
 
-  FILTER( ?date >= xsd:date("2018-01-01"))
+  FILTER( ?date >= xsd:date("2018-01-01")) .
 }
-
 
 
 
@@ -111,14 +112,10 @@ WHERE
 
 
 
-
-
 ## ------------------------- ATLAS GENE EXPRESSION QUERIES ------------------------- ##
 
 
-
 ## QUERY 7 --> What is the Affymetrix probe ID for the Arabiodopsis Apetala3 gene? (HINT - you cannot answer this directly from Atlas - you will first have to look at what kinds of database cross-references are in Atlas, and then construct the appropriate URI for the Apetala3 gene based on its ID number in *that* database)
-
 
 PREFIX atlasterms:<http://rdf.ebi.ac.uk/terms/expressionatlas/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -127,15 +124,14 @@ SELECT  DISTINCT ?probe_id
 WHERE {
   ?gene rdfs:label 'AP3' .
 
-  ?expression atlasterms:refersTo   ?gene ;
+  ?expression atlasterms:refersTo ?gene ;
               atlasterms:refersTo ?probe .
 
   ?probe rdfs:label ?probe_id .
-
-  FILTER CONTAINS(str(?probe), "AFFY")
+  
+  FILTER CONTAINS(str(?probe), "AFFY") .
 
 }
-
 
 
 
@@ -153,7 +149,8 @@ WHERE {
         atlasterms:pValue ?pvalue ;
         atlasterms:tStatistic ?tstat .
 	?analysis  rdfs:label    ?description .
-	FILTER(?tstat < -3)
+	
+   FILTER(?tstat < -3) .
 }
 
 
@@ -171,9 +168,10 @@ PREFIX tax: <http://identifiers.org/taxonomy/>
 
 SELECT (COUNT (DISTINCT ?pathway) AS ?countPathways)
 WHERE {
-  ?pathway rdf:type biopax3:Pathway ;
+  ?pathway a biopax3:Pathway ;
            biopax3:organism tax:3702 .
 }
+
 
 
 ## QUERY 10 --> Get all PubMed references for the pathway with the name “Degradation of the
@@ -184,7 +182,7 @@ PREFIX biopax3: <http://www.biopax.org/release/biopax-level3.owl#>
 
 SELECT DISTINCT ?idPubmed ?title
 WHERE {
-  ?pathway rdf:type biopax3:Pathway ;
+  ?pathway a biopax3:Pathway ;
            biopax3:displayName ?name ;
            biopax3:xref ?ref .
 
@@ -199,7 +197,9 @@ WHERE {
 
 
 
+
 ## ------------------------- BONUS QUERIES ------------------------- ##
+
 
 ## QUERY 11 --> find the AGI codes and gene names for all Arabidopsis thaliana proteins that have a protein function annotation description that mentions "pattern formation"
 
@@ -212,16 +212,16 @@ SELECT DISTINCT ?agiCode ?geneName
 WHERE
 {
   ?protein a up:Protein ;
-             up:organism taxon:3702 ;
-             up:annotation ?annotation ;
-             up:encodedBy ?gene.
+           up:organism taxon:3702 ;
+           up:annotation ?annotation ;
+           up:encodedBy ?gene.
   
   ?gene up:locusName ?agiCode ;
         skos:prefLabel ?geneName .
   
   ?annotation rdfs:comment ?comment .
   
-  FILTER CONTAINS(str(?comment), 'pattern formation')
+  FILTER CONTAINS(str(?comment), 'pattern formation') .
 }
   
 
@@ -234,7 +234,7 @@ PREFIX tax: <http://identifiers.org/taxonomy/>
 
 SELECT (COUNT (DISTINCT ?totalEvidence) AS ?countTotalEvidence) (COUNT (DISTINCT ?electronicEvidence) AS ?countElectronicEvidence)
 WHERE {
-  ?pathway rdf:type biopax3:Pathway ;
+  ?pathway a biopax3:Pathway ;
            biopax3:organism tax:3702 ;
            biopax3:evidence ?totalEvidence ;
            biopax3:evidence ?electronicEvidence .
@@ -244,7 +244,7 @@ WHERE {
 
   ?eviCode biopax3:term ?term .
   
-  FILTER(str(?term) = 'inferred from electronic annotation')
+  FILTER(str(?term) = 'inferred from electronic annotation') .
 }
 
 
