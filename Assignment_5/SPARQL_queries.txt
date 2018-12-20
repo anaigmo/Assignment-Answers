@@ -45,19 +45,22 @@ PREFIX uniprotkb:<http://purl.uniprot.org/uniprot/>
 PREFIX up:<http://purl.uniprot.org/core/> 
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#> 
 
-SELECT DISTINCT ?name ?act
+SELECT DISTINCT ?name ?description ?reaction
 WHERE
 {
   uniprotkb:Q9SZZ8 a up:Protein ;
-                   up:enzyme ?enzyme .
+                   up:enzyme ?enzyme ;
+                   up:annotation ?annotation .
+  
+  ?annotation a up:Function_Annotation ;
+       rdfs:comment ?description .
   
   ?enzyme skos:prefLabel ?name ;
           up:activity ?activity .
   
-  ?activity rdfs:label ?act .
+  ?activity rdfs:label ?reaction .
   	
 }
-
 
 
 ## QUERY 4 -->  Retrieve the proteins ids, and date of submission, for proteins that have been added to UniProt this year 
@@ -140,15 +143,15 @@ WHERE {
 PREFIX atlasterms:<http://rdf.ebi.ac.uk/terms/expressionatlas/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT DISTINCT ?description   ?pvalue   ?tstat
+SELECT DISTINCT ?description ?pvalue ?tstat
 WHERE {
    ?gene rdfs:label 'AP3' .
 
    ?expression  atlasterms:refersTo   ?gene ;
-        atlasterms:isOutputOf ?analysis ;
-        atlasterms:pValue ?pvalue ;
-        atlasterms:tStatistic ?tstat .
-	?analysis  rdfs:label    ?description .
+                atlasterms:isOutputOf ?analysis ;
+                atlasterms:tStatistic ?tstat .
+    
+   ?analysis  rdfs:label    ?description .
 	
    FILTER(?tstat < -3) .
 }
@@ -188,7 +191,7 @@ WHERE {
 
   ?ref biopax3:db ?database ;
        biopax3:title ?title ;
-       biopax3:id ?idPubmed
+       biopax3:id ?idPubmed .
   
   FILTER(str(?name) = 'Degradation of the extracellular matrix') .
   FILTER(str(?database) = 'Pubmed') .
@@ -239,8 +242,7 @@ WHERE {
            biopax3:evidence ?totalEvidence ;
            biopax3:evidence ?electronicEvidence .
 
-  ?electronicEvidence biopax3:comment ?comment ;
-                      biopax3:evidenceCode ?eviCode .
+  ?electronicEvidence biopax3:evidenceCode ?eviCode .
 
   ?eviCode biopax3:term ?term .
   
