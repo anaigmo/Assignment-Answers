@@ -8,8 +8,10 @@
 # of the query sequence and a percent of identity of 30%. I have chosen those values according to what
 # I have read in the literature. The e-value is not tough, but above 1e-05 it seems it is not robust enough,
 # and under 1e-6 is considered necesary for nucleotide blast. Regarding the overlapping length, it's the most
-# common value I've seen. 70-75% of the length of the sequence could be also used, but for a first approximation
-# to look for orthologues I preferred not to be so tough, same happens with the value of identity.
+# common value I've seen. 70-75% of the length for overlap could be also used, but for a first approximation
+# to look for orthologues I preferred not to be so tough, same happens with the value of identity, which is
+# fixed at 30%.
+
 
 require 'bio'
 require 'stringio'
@@ -182,9 +184,8 @@ def find_reciprocal_best_hits(db1, db2)
     
     best_hits2[id_query] = id_bh   # stores the gene id correspondance
       
-    puts("Best hit found: #{id_query} -> #{id_bh}")
+    puts("Best hit found: #{id_query} -> #{id_bh}")  ## ESTO SE PUEDE QUITAR
     puts("%overlap: #{percent_overlap}\t%identity: #{percent_identity}\tevalue: #{report.hits[0].evalue}")
-    puts()
     
   end
   
@@ -203,7 +204,7 @@ end
 
 
 
-def write_repot(rec_best_hits, db1_name, db2_name)
+def write_report(rec_best_hits, db1_name, db2_name)
   # This function prints in a tabular format file the reciprocal best hits found
   
   puts("The reciprocal best hits found will be saved in Reciprocal_best_hits.tsv")
@@ -230,4 +231,4 @@ puts("Finding best reciprocal hits, it will take a while. ")
 rec_best_hits = find_reciprocal_best_hits(db1_name, db2_name)
 
 # And print it in a file called 'Reciprocal_best_hits.tsv
-write_repot(rec_best_hits, db1_name, db2_name)
+write_report(rec_best_hits, db1_name, db2_name)
