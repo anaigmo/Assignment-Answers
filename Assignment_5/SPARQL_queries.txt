@@ -122,17 +122,21 @@ WHERE
 
 PREFIX atlasterms:<http://rdf.ebi.ac.uk/terms/expressionatlas/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
 
 SELECT  DISTINCT ?probe_id
 WHERE {
-  ?gene rdfs:label 'AP3' .
 
   ?expression atlasterms:refersTo ?gene ;
               atlasterms:refersTo ?probe .
+  
+  ?gene rdfs:label 'AP3' ;
+        dcterms:identifier ?geneid .
 
   ?probe rdfs:label ?probe_id .
   
   FILTER CONTAINS(str(?probe), "AFFY") .
+  FILTER CONTAINS(str(?geneid), "AT") .
 
 }
 
